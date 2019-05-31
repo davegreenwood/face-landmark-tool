@@ -54,10 +54,10 @@ class imageLabeler(QtWidgets.QMainWindow):
             self, "About Image Viewer", msg)
 
     def createMenus(self):
-        self.openAct = QtWidgets.QAction("&Open...", self, shortcut="Ctrl+O",
-                               triggered=self.open_image)
-        self.exitAct = QtWidgets.QAction("E&xit", self, shortcut="Ctrl+Q",
-                               triggered=self.close)
+        self.openAct = QtWidgets.QAction(
+            "&Open...", self, shortcut="Ctrl+O", triggered=self.open_image)
+        self.exitAct = QtWidgets.QAction(
+            "E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
         self.aboutAct = QtWidgets.QAction("&About", self, triggered=self.about)
 
         self.fileMenu = QtWidgets.QMenu("&File", self)
@@ -72,22 +72,22 @@ class imageLabeler(QtWidgets.QMainWindow):
         self.menuBar().addMenu(self.helpMenu)
 
     def open_landmarks(self):
-        fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open Landmark FIle",
-                                               QtCore.QDir.currentPath())
+        fname, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Open Landmark FIle", QtCore.QDir.currentPath())
         if not fname:
             return
         self.landmarks = read_json(fname)
 
     def open_image(self):
-        fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open Image",
-                                               QtCore.QDir.currentPath())
+        fname, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Open Image", QtCore.QDir.currentPath())
         if not fname:
             return
 
         image = QtGui.QImage(fname)
         if image.isNull():
-            QtWidgets.QMessageBox.information(self, "Image Viewer",
-                                    "Cannot load %s." % fname)
+            QtWidgets.QMessageBox.information(
+                self, "Image Viewer", "Cannot load %s." % fname)
             return
         self.viewer.setPhoto(QtGui.QPixmap.fromImage(image))
         # self.p_image.setPixmap(QtGui.QPixmap.fromImage(image))
