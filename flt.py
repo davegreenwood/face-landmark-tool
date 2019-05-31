@@ -11,21 +11,17 @@ def read_json(fname):
     return data
 
 
-def test_poly(scene):
-    points = QtGui.QPolygonF()
-    points.append(QtCore.QPointF(-10., -10.))
-    points.append(QtCore.QPointF(10., -10.))
-    points.append(QtCore.QPointF(10., 10.))
-    points.append(QtCore.QPointF(-10., 10.))
-    poly = scene.addPolygon(points,
-                            QtGui.QPen(
-                                QtGui.QColor(255, 128, 0), 0.5,
-                                QtCore.Qt.SolidLine,
-                                QtCore.Qt.RoundCap,
-                                QtCore.Qt.RoundJoin),
-                            QtGui.QBrush(QtGui.QColor(255, 0, 0, 128)))
-    poly.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
-    poly.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
+class Marker(QtWidgets.QGraphicsPolygonItem):
+    def __init__(self, parent=None):
+        super(Marker, self).__init__(parent)
+        self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
+        self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
+        self.setZValue(10)
+        p = [QtCore.QPointF(-10., -10.), QtCore.QPointF(10., -10.),
+             QtCore.QPointF(10., 10.), QtCore.QPointF(-10., 10.)]
+        self.setPolygon(QtGui.QPolygonF(p))
+        self.setPen(QtGui.QPen(QtGui.QColor("Green"), 0.5))
+        self.setBrush(QtGui.QColor(255, 0, 0, 128))
 
 
 class imageLabeler(QtWidgets.QMainWindow):
@@ -38,7 +34,7 @@ class imageLabeler(QtWidgets.QMainWindow):
         self.createMenus()
         self.setWindowTitle("Face Label Tool (FLT)")
         self.resize(800, 800)
-        test_poly(self.viewer.scene)
+        self.viewer.scene.addItem(Marker())
 
     def about(self):
         msg = """Face Label Tool Help:"""
@@ -47,20 +43,29 @@ class imageLabeler(QtWidgets.QMainWindow):
 
     def createMenus(self):
         self.openAct = QtWidgets.QAction(
-            "&Open...", self, shortcut="Ctrl+O", triggered=self.open_image)
+            "Open...", self, shortcut="Ctrl+O", triggered=self.open_image)
         self.exitAct = QtWidgets.QAction(
-            "E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
-        self.aboutAct = QtWidgets.QAction("&About", self, triggered=self.about)
+            "Exit", self, shortcut="Ctrl+Q", triggered=self.close)
+        self.aboutAct = QtWidgets.QAction(
+            "About", self, triggered=self.about)
+        self.fitAct = QtWidgets.QAction(
+            "Fit to view", self, shortcut="Ctrl+F",
+            triggered=self.viewer.fitInView)
 
         self.fileMenu = QtWidgets.QMenu("&File", self)
         self.fileMenu.addAction(self.openAct)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
 
+        self.viewMenu = QtWidgets.QMenu("&View", self)
+        self.viewMenu.addAction(self.fitAct)
+
         self.helpMenu = QtWidgets.QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)
 
+        # self.menuBar().setNativeMenuBar(False)
         self.menuBar().addMenu(self.fileMenu)
+        self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
 
     def open_landmarks(self):
@@ -92,11 +97,8 @@ class ImageView(QtWidgets.QGraphicsView):
 
     def __init__(self, parent):
         super(ImageView, self).__init__(parent)
-        self.zoom = 0
-        self.empty = True
         self.scene = QtWidgets.QGraphicsScene(self)
         self.photo = QtWidgets.QGraphicsPixmapItem()
-        self.photo.setZValue(-1)
         self.scene.addItem(self.photo)
         self.setScene(self.scene)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
@@ -106,31 +108,18 @@ class ImageView(QtWidgets.QGraphicsView):
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(30, 30, 30)))
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
 
-    def hasPhoto(self):
-        return not self.empty
-
     def fitInView(self, scale=True):
         rect = QtCore.QRectF(self.photo.pixmap().rect())
         if not rect.isNull():
             self.setSceneRect(rect)
-            if self.hasPhoto():
-                unity = self.transform().mapRect(QtCore.QRectF(0, 0, 1, 1))
-                self.scale(1 / unity.width(), 1 / unity.height())
-                viewrect = self.viewport().rect()
-                scenerect = self.transform().mapRect(rect)
-                factor = min(viewrect.width() / scenerect.width(),
-                             viewrect.height() / scenerect.height())
-                self.scale(factor, factor)
-            self.zoom = 0
+        self.resetTransform()
+        self.scale(1.0, 1.0)
 
     def setPhoto(self, pixmap=None):
-        self.zoom = 0
         if pixmap and not pixmap.isNull():
-            self.empty = False
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
             self.photo.setPixmap(pixmap)
         else:
-            self.empty = True
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
             self.photo.setPixmap(QtGui.QPixmap())
         self.fitInView()
@@ -138,16 +127,9 @@ class ImageView(QtWidgets.QGraphicsView):
     def wheelEvent(self, event):
         if event.angleDelta().y() > 0:
             factor = 1.25
-            self.zoom += 1
         else:
             factor = 0.8
-            self.zoom -= 1
-        if self.zoom > 0:
-            self.scale(factor, factor)
-        elif self.zoom == 0:
-            self.fitInView()
-        else:
-            self.zoom = 0
+        self.scale(factor, factor)
 
     def toggleDragMode(self):
         if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
