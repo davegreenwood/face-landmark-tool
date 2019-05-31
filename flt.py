@@ -2,14 +2,7 @@
 import sys
 import json
 import numpy as np
-from PyQt5.QtCore import QDir, Qt, QPoint, QPointF, pyqtSignal, QRectF
-from PyQt5.QtGui import (
-    QImage, QPainter, QPalette, QPixmap, QBrush, QColor,
-    QPolygonF, QPen)
-from PyQt5.QtWidgets import (
-    QAction, QApplication, QFileDialog, QLabel, QMainWindow, QMenu,
-    QMessageBox, QScrollArea, QSizePolicy, QGraphicsView, QGraphicsScene,
-    QGraphicsPixmapItem, QFrame, QGraphicsItem)
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 def read_json(fname):
@@ -21,26 +14,29 @@ def read_json(fname):
 def place_holder():
     h, w, c = 200, 200, 3
     img = np.ones([h, w, c], dtype=np.uint8) * 32
-    bytesPerLine = 3 * w
-    qimg = QImage(img.data, w, h, bytesPerLine, QImage.Format_RGB888)
-    return QPixmap(qimg)
+    _bytes = 3 * w
+    qimg = QtGui.QImage(img.data, w, h, _bytes, QtGui.QImage.Format_RGB888)
+    return QtGui.QPixmap(qimg)
 
 
 def test_poly(scene):
-    points = QPolygonF()
-    points.append(QPointF(-10., -10.))
-    points.append(QPointF(10., -10.))
-    points.append(QPointF(10., 10.))
-    points.append(QPointF(-10., 10.))
-    poly = scene.addPolygon(points, QPen(QColor(255, 128, 0), 0.5,
-                                         Qt.SolidLine, Qt.RoundCap,
-                                         Qt.RoundJoin),
-                            QBrush(QColor(255, 0, 0, 128)))
-    poly.setFlag(QGraphicsItem.ItemIsSelectable)
-    poly.setFlag(QGraphicsItem.ItemIsMovable)
+    points = QtGui.QPolygonF()
+    points.append(QtCore.QPointF(-10., -10.))
+    points.append(QtCore.QPointF(10., -10.))
+    points.append(QtCore.QPointF(10., 10.))
+    points.append(QtCore.QPointF(-10., 10.))
+    poly = scene.addPolygon(points,
+                            QtGui.QPen(
+                                QtGui.QColor(255, 128, 0), 0.5,
+                                QtCore.Qt.SolidLine,
+                                QtCore.Qt.RoundCap,
+                                QtCore.Qt.RoundJoin),
+                            QtGui.QBrush(QtGui.QColor(255, 0, 0, 128)))
+    poly.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
+    poly.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
 
 
-class imageLabeler(QMainWindow):
+class imageLabeler(QtWidgets.QMainWindow):
     """The main application window with menu items."""
 
     def __init__(self):
@@ -54,47 +50,47 @@ class imageLabeler(QMainWindow):
 
     def about(self):
         msg = """Face Label Tool Help:"""
-        QMessageBox.about(
+        QtWidgets.QMessageBox.about(
             self, "About Image Viewer", msg)
 
     def createMenus(self):
-        self.openAct = QAction("&Open...", self, shortcut="Ctrl+O",
+        self.openAct = QtWidgets.QAction("&Open...", self, shortcut="Ctrl+O",
                                triggered=self.open_image)
-        self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q",
+        self.exitAct = QtWidgets.QAction("E&xit", self, shortcut="Ctrl+Q",
                                triggered=self.close)
-        self.aboutAct = QAction("&About", self, triggered=self.about)
+        self.aboutAct = QtWidgets.QAction("&About", self, triggered=self.about)
 
-        self.fileMenu = QMenu("&File", self)
+        self.fileMenu = QtWidgets.QMenu("&File", self)
         self.fileMenu.addAction(self.openAct)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
 
-        self.helpMenu = QMenu("&Help", self)
+        self.helpMenu = QtWidgets.QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)
 
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.helpMenu)
 
     def open_landmarks(self):
-        fname, _ = QFileDialog.getOpenFileName(self, "Open Landmark FIle",
-                                               QDir.currentPath())
+        fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open Landmark FIle",
+                                               QtCore.QDir.currentPath())
         if not fname:
             return
         self.landmarks = read_json(fname)
 
     def open_image(self):
-        fname, _ = QFileDialog.getOpenFileName(self, "Open Image",
-                                               QDir.currentPath())
+        fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open Image",
+                                               QtCore.QDir.currentPath())
         if not fname:
             return
 
-        image = QImage(fname)
+        image = QtGui.QImage(fname)
         if image.isNull():
-            QMessageBox.information(self, "Image Viewer",
+            QtWidgets.QMessageBox.information(self, "Image Viewer",
                                     "Cannot load %s." % fname)
             return
-        self.viewer.setPhoto(QPixmap.fromImage(image))
-        # self.p_image.setPixmap(QPixmap.fromImage(image))
+        self.viewer.setPhoto(QtGui.QPixmap.fromImage(image))
+        # self.p_image.setPixmap(QtGui.QPixmap.fromImage(image))
         self.scaleFactor = 1.0
         # for i in self.viewer.scene.items():
         #     print(i.pos().x(), i.pos().y())
@@ -105,34 +101,34 @@ class imageLabeler(QMainWindow):
 # -----------------------------------------------------------------------------
 
 
-class ImageView(QGraphicsView):
-    photoClicked = pyqtSignal(QPoint)
+class ImageView(QtWidgets.QGraphicsView):
+    # photoClicked = QtCore.pyqtSignal(QtCore.QPoint)
 
     def __init__(self, parent):
         super(ImageView, self).__init__(parent)
         self.zoom = 0
         self.empty = True
-        self.scene = QGraphicsScene(self)
-        self.photo = QGraphicsPixmapItem()
+        self.scene = QtWidgets.QGraphicsScene(self)
+        self.photo = QtWidgets.QGraphicsPixmapItem()
         self.photo.setZValue(-1)
         self.scene.addItem(self.photo)
         self.setScene(self.scene)
-        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
-        self.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setBackgroundBrush(QBrush(QColor(30, 30, 30)))
-        self.setFrameShape(QFrame.NoFrame)
+        self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(30, 30, 30)))
+        self.setFrameShape(QtWidgets.QFrame.NoFrame)
 
     def hasPhoto(self):
         return not self.empty
 
     def fitInView(self, scale=True):
-        rect = QRectF(self.photo.pixmap().rect())
+        rect = QtCore.QRectF(self.photo.pixmap().rect())
         if not rect.isNull():
             self.setSceneRect(rect)
             if self.hasPhoto():
-                unity = self.transform().mapRect(QRectF(0, 0, 1, 1))
+                unity = self.transform().mapRect(QtCore.QRectF(0, 0, 1, 1))
                 self.scale(1 / unity.width(), 1 / unity.height())
                 viewrect = self.viewport().rect()
                 scenerect = self.transform().mapRect(rect)
@@ -145,12 +141,12 @@ class ImageView(QGraphicsView):
         self.zoom = 0
         if pixmap and not pixmap.isNull():
             self.empty = False
-            self.setDragMode(QGraphicsView.ScrollHandDrag)
+            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
             self.photo.setPixmap(pixmap)
         else:
             self.empty = True
-            self.setDragMode(QGraphicsView.NoDrag)
-            self.photo.setPixmap(QPixmap())
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
+            self.photo.setPixmap(QtGui.QPixmap())
         self.fitInView()
 
     def wheelEvent(self, event):
@@ -168,19 +164,19 @@ class ImageView(QGraphicsView):
             self.zoom = 0
 
     def toggleDragMode(self):
-        if self.dragMode() == QGraphicsView.ScrollHandDrag:
-            self.setDragMode(QGraphicsView.NoDrag)
+        if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
+            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
         elif not self.photo.pixmap().isNull():
-            self.setDragMode(QGraphicsView.ScrollHandDrag)
+            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
 
-    def mousePressEvent(self, event):
-        if self.photo.isUnderMouse():
-            self.photoClicked.emit(QPoint(event.pos()))
-        super(ImageView, self).mousePressEvent(event)
+    # def mousePressEvent(self, event):
+    #     if self.photo.isUnderMouse():
+    #         self.photoClicked.emit(QPoint(event.pos()))
+    #     super(ImageView, self).mousePressEvent(event)
 
 
 if __name__ == '__main__':
-    app = QApplication(["Face Label Tool"])
+    app = QtWidgets.QApplication(["Face Label Tool"])
     imageLabeler = imageLabeler()
     imageLabeler.show()
     sys.exit(app.exec_())
