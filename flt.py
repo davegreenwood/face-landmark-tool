@@ -11,14 +11,6 @@ def read_json(fname):
     return data
 
 
-def place_holder():
-    h, w, c = 200, 200, 3
-    img = np.ones([h, w, c], dtype=np.uint8) * 32
-    _bytes = 3 * w
-    qimg = QtGui.QImage(img.data, w, h, _bytes, QtGui.QImage.Format_RGB888)
-    return QtGui.QPixmap(qimg)
-
-
 def test_poly(scene):
     points = QtGui.QPolygonF()
     points.append(QtCore.QPointF(-10., -10.))
@@ -90,11 +82,6 @@ class imageLabeler(QtWidgets.QMainWindow):
                 self, "Image Viewer", "Cannot load %s." % fname)
             return
         self.viewer.setPhoto(QtGui.QPixmap.fromImage(image))
-        # self.p_image.setPixmap(QtGui.QPixmap.fromImage(image))
-        self.scaleFactor = 1.0
-        # for i in self.viewer.scene.items():
-        #     print(i.pos().x(), i.pos().y())
-
 
 # -----------------------------------------------------------------------------
 # Graphics View
@@ -102,7 +89,6 @@ class imageLabeler(QtWidgets.QMainWindow):
 
 
 class ImageView(QtWidgets.QGraphicsView):
-    # photoClicked = QtCore.pyqtSignal(QtCore.QPoint)
 
     def __init__(self, parent):
         super(ImageView, self).__init__(parent)
@@ -168,11 +154,6 @@ class ImageView(QtWidgets.QGraphicsView):
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
         elif not self.photo.pixmap().isNull():
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
-
-    # def mousePressEvent(self, event):
-    #     if self.photo.isUnderMouse():
-    #         self.photoClicked.emit(QPoint(event.pos()))
-    #     super(ImageView, self).mousePressEvent(event)
 
 
 if __name__ == '__main__':
