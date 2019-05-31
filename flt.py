@@ -2,6 +2,7 @@
 import sys
 import json
 import numpy as np
+from pkg_resources import resource_filename
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -17,8 +18,8 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.setZValue(10)
-        p = [QtCore.QPointF(-10., -10.), QtCore.QPointF(10., -10.),
-             QtCore.QPointF(10., 10.), QtCore.QPointF(-10., 10.)]
+        p = [QtCore.QPointF(-5., -5.), QtCore.QPointF(5., -5.),
+             QtCore.QPointF(5., 5.), QtCore.QPointF(-5., 5.)]
         self.setPolygon(QtGui.QPolygonF(p))
         self.setPen(QtGui.QPen(QtGui.QColor("Green"), 0.5))
         self.setBrush(QtGui.QColor(255, 0, 0, 128))
@@ -34,12 +35,11 @@ class imageLabeler(QtWidgets.QMainWindow):
         self.createMenus()
         self.setWindowTitle("Face Label Tool (FLT)")
         self.resize(800, 800)
-        self.viewer.scene.addItem(Marker())
+        self.show()
 
     def about(self):
         msg = """Face Label Tool Help:"""
-        QtWidgets.QMessageBox.about(
-            self, "About Image Viewer", msg)
+        QtWidgets.QMessageBox.about(self, "About Image Viewer", msg)
 
     def createMenus(self):
         self.openAct = QtWidgets.QAction(
@@ -63,7 +63,7 @@ class imageLabeler(QtWidgets.QMainWindow):
         self.helpMenu = QtWidgets.QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)
 
-        # self.menuBar().setNativeMenuBar(False)
+        self.menuBar().setNativeMenuBar(True)
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
@@ -98,8 +98,9 @@ class ImageView(QtWidgets.QGraphicsView):
     def __init__(self, parent):
         super(ImageView, self).__init__(parent)
         self.scene = QtWidgets.QGraphicsScene(self)
-        self.photo = QtWidgets.QGraphicsPixmapItem()
-        self.scene.addItem(self.photo)
+        self.image = QtWidgets.QGraphicsPixmapItem()
+        self.scene.addItem(self.image)
+        self.scene.addItem(Marker())
         self.setScene(self.scene)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
@@ -109,7 +110,7 @@ class ImageView(QtWidgets.QGraphicsView):
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
 
     def fitInView(self, scale=True):
-        rect = QtCore.QRectF(self.photo.pixmap().rect())
+        rect = QtCore.QRectF(self.image.pixmap().rect())
         if not rect.isNull():
             self.setSceneRect(rect)
         self.resetTransform()
@@ -118,10 +119,10 @@ class ImageView(QtWidgets.QGraphicsView):
     def setPhoto(self, pixmap=None):
         if pixmap and not pixmap.isNull():
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
-            self.photo.setPixmap(pixmap)
+            self.image.setPixmap(pixmap)
         else:
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-            self.photo.setPixmap(QtGui.QPixmap())
+            self.image.setPixmap(QtGui.QPixmap())
         self.fitInView()
 
     def wheelEvent(self, event):
@@ -134,12 +135,13 @@ class ImageView(QtWidgets.QGraphicsView):
     def toggleDragMode(self):
         if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
             self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-        elif not self.photo.pixmap().isNull():
+        elif not self.image.pixmap().isNull():
             self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
 
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(["Face Label Tool"])
-    imageLabeler = imageLabeler()
-    imageLabeler.show()
+    path = resource_filename(__name__, "icon.png")
+    app.setWindowIcon(QtGui.QIcon(path))
+    ui = imageLabeler()
     sys.exit(app.exec_())
