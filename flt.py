@@ -12,17 +12,92 @@ def read_json(fname):
     return data
 
 
-class Marker(QtWidgets.QGraphicsPolygonItem):
+class Group(QtWidgets.QGraphicsItem):
+    """"""
+
     def __init__(self, parent=None):
-        super(Marker, self).__init__(parent)
+        super(Group, self).__init__()
+        self.line_col = QtGui.QColor(0, 255, 0)
+        self.pen = QtGui.QPen(self.line_col, 0.5)
+        self.rect = QtCore.QRectF()
+        m1 = Marker(parent=self)
+        m2 = Marker(parent=self)
+        m2.setPos(20, 30)
+        self.markers = [m1, m2]
+        self.polyline = QtGui.QPolygonF()
+        self.setpolyline()
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.setZValue(10)
-        p = [QtCore.QPointF(-5., -5.), QtCore.QPointF(5., -5.),
-             QtCore.QPointF(5., 5.), QtCore.QPointF(-5., 5.)]
-        self.setPolygon(QtGui.QPolygonF(p))
-        self.setPen(QtGui.QPen(QtGui.QColor("Green"), 0.5))
-        self.setBrush(QtGui.QColor(255, 0, 0, 128))
+
+    def boundingRect(self):
+        return self.rect
+
+    def paint(self, painter=None, style=None, widget=None):
+        self.setpolyline()
+        painter.setPen(self.pen)
+        painter.drawPolyline(self.polyline)
+
+    def setpolyline(self):
+        self.polyline.clear()
+        x, y = [], []
+        for m in self.markers:
+            p = m.pos()
+            x.append(p.x())
+            y.append(p.y())
+            self.polyline.append(p)
+        self.rect = QtCore.QRectF(
+            min(x) - 6, min(y) - 6,
+            max(x) - min(x) + 6,
+            max(y) - min(y) + 6)
+
+
+class Marker(QtWidgets.QGraphicsItem):
+    """
+    Draggable - https://stackoverflow.com/a/28519324
+    """
+
+    def __init__(self, parent=None):
+        super(Marker, self).__init__(parent)
+        self.fill_col = QtGui.QColor(0, 255, 0, 50)
+        self.line_col = QtGui.QColor(0, 255, 0)
+        self.pen = QtGui.QPen(self.line_col, 0.5)
+        self.rect = QtCore.QRectF(-6, -6, 12, 12)
+        self.line1 = QtCore.QLineF(0, 0, 0, 5)
+        self.line2 = QtCore.QLineF(0, 0, 0, -5)
+        self.line3 = QtCore.QLineF(0, 0, 5, 0)
+        self.line4 = QtCore.QLineF(0, 0, -5, 0)
+        self.setCursor(QtCore.Qt.OpenHandCursor)
+        self.setAcceptedMouseButtons(QtCore.Qt.LeftButton)
+        self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
+        self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
+        self.setZValue(10)
+
+    def boundingRect(self):
+        return self.rect
+
+    def paint(self, painter=None, style=None, widget=None):
+        painter.setPen(self.pen)
+        for line in [self.line1, self.line2, self.line3, self.line4]:
+            painter.drawLine(line)
+        painter.fillRect(self.rect, self.fill_col)
+
+    # def mouseMoveEvent(self, event):
+    #     if (QtCore.QLineF(
+    #         QtCore.QPointF(event.screenPos()),
+    #         QtCore.QPointF(event.buttonDownScreenPos(
+    #             QtCore.Qt.LeftButton))).length()
+    #             < QtWidgets.QApplication.startDragDistance()):
+    #         return
+    #     drag = QtGui.QDrag(event.widget())
+    #     drag.exec_()
+    #     self.setCursor(QtCore.Qt.OpenHandCursor)
+
+    # def mousePressEvent(self, event):
+    #     self.setCursor(QtCore.Qt.ClosedHandCursor)
+
+    # def mouseReleaseEvent(self, event):
+    #     self.setCursor(QtCore.Qt.OpenHandCursor)
 
 
 class imageLabeler(QtWidgets.QMainWindow):
@@ -52,15 +127,15 @@ class imageLabeler(QtWidgets.QMainWindow):
             "Fit to view", self, shortcut="Ctrl+F",
             triggered=self.viewer.fitInView)
 
-        self.fileMenu = QtWidgets.QMenu("&File", self)
+        self.fileMenu = QtWidgets.QMenu("File", self)
         self.fileMenu.addAction(self.openAct)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
 
-        self.viewMenu = QtWidgets.QMenu("&View", self)
+        self.viewMenu = QtWidgets.QMenu("View", self)
         self.viewMenu.addAction(self.fitAct)
 
-        self.helpMenu = QtWidgets.QMenu("&Help", self)
+        self.helpMenu = QtWidgets.QMenu("Help", self)
         self.helpMenu.addAction(self.aboutAct)
 
         self.menuBar().setNativeMenuBar(True)
@@ -100,7 +175,7 @@ class ImageView(QtWidgets.QGraphicsView):
         self.scene = QtWidgets.QGraphicsScene(self)
         self.image = QtWidgets.QGraphicsPixmapItem()
         self.scene.addItem(self.image)
-        self.scene.addItem(Marker())
+        self.scene.addItem(Group())
         self.setScene(self.scene)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
@@ -131,6 +206,12 @@ class ImageView(QtWidgets.QGraphicsView):
         else:
             factor = 0.8
         self.scale(factor, factor)
+
+    # def mousePressEvent(self, event):
+    #     self.setCursor(QtCore.Qt.ClosedHandCursor)
+
+    # def mouseReleaseEvent(self, event):
+    #     self.setCursor(QtCore.Qt.OpenHandCursor)
 
     def toggleDragMode(self):
         if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
