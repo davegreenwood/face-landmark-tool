@@ -96,6 +96,10 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
         self.m_items.append(item)
         item.setPos(p)
 
+    def add_points(self, pts):
+        for x, y in pts:
+            self.addPoint(QtCore.QPointF(x, y))
+
     def movePoint(self, index, pos):
         if 0 <= index < len(self.m_points):
             self.m_points[index] = self.mapFromScene(pos)
@@ -128,24 +132,39 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
 # -----------------------------------------------------------------------------
 
 
+class LabelerScene(QtWidgets.QGraphicsScene):
+    """Inherit Graphics Scene to allow adding of LineGroup objects."""
+    def __init__(self, parent):
+        super(LabelerScene, self).__init__(parent)
+
+    def add_group(self, pts, label=None):
+        group = LineGroup()
+        if label:
+            group.setToolTip(label)
+        self.addItem(group)
+        group.add_points(pts)
+
 
 # -----------------------------------------------------------------------------
 # Graphics View
 # -----------------------------------------------------------------------------
 
 
-class ImageView(QtWidgets.QGraphicsView):
+class LabelerView(QtWidgets.QGraphicsView):
 
     def __init__(self, parent):
-        super(ImageView, self).__init__(parent)
-        self.scene = QtWidgets.QGraphicsScene(self)
+        super(LabelerView, self).__init__(parent)
+        self.scene = LabelerScene(self)
+        self.setScene(self.scene)
+
         self.image = QtWidgets.QGraphicsPixmapItem()
         self.scene.addItem(self.image)
-        self.line = LineGroup()
-        self.scene.addItem(self.line)
-        for x, y in [[10, 20], [20, 30], [30, 40]]:
-            self.line.addPoint(QtCore.QPointF(x, y))
-        self.setScene(self.scene)
+
+        self.scene.add_group([[10, 20], [20, 30], [30, 40]], "left_eye")
+
+        self.setRenderHints(QtGui.QPainter.Antialiasing |
+                            QtGui.QPainter.SmoothPixmapTransform)
+        self.setMouseTracking(True)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -193,7 +212,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(imageLabelerWindow, self).__init__()
-        self.viewer = ImageView(self)
+        self.viewer = LabelerView(self)
         self.setCentralWidget(self.viewer)
         self.createMenus()
         self.setWindowTitle("Face Label Tool (FLT)")
