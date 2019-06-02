@@ -236,9 +236,9 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
 
     def createMenus(self):
         self.openAct = QtWidgets.QAction(
-            "Open...", self, shortcut="Ctrl+O", triggered=self.open_image)
+            "Open...", self, shortcut="Ctrl+O", triggered=self.open_img)
         self.modelAct = QtWidgets.QAction(
-            "Open Model..", self, shortcut="Ctrl+M", triggered=self.open_model)
+            "Open Model...", self, shortcut="Ctrl+M", triggered=self.open_mdl)
         self.exitAct = QtWidgets.QAction(
             "Exit", self, shortcut="Ctrl+Q", triggered=self.close)
         self.aboutAct = QtWidgets.QAction(
@@ -269,15 +269,15 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
 
-    def open_model(self):
+    def open_mdl(self):
         fname, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Open Landmark FIle", QtCore.QDir.currentPath())
+            self, "Open Model File", QtCore.QDir.currentPath())
         if not fname:
             return
         model = read_json(fname)
         self.scene.add_model(model)
 
-    def open_image(self):
+    def open_img(self):
         fname, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, "Open Image", QtCore.QDir.currentPath())
         if not fname:
@@ -291,7 +291,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
 
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(["Face Label Tool"])
+    app = QtWidgets.QApplication(["Face Label Tool"] + sys.argv[1:])
     path = resource_filename(__name__, "icon.png")
     app.setWindowIcon(QtGui.QIcon(path))
     ui = imageLabelerWindow()
