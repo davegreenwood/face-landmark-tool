@@ -13,10 +13,10 @@ def read_json(fname):
 
 
 class Group(QtWidgets.QGraphicsItem):
-    """"""
+    """https://stackoverflow.com/a/32198716"""
 
     def __init__(self, parent=None):
-        super(Group, self).__init__()
+        super(Group, self).__init__(parent)
         self.line_col = QtGui.QColor(0, 255, 0)
         self.pen = QtGui.QPen(self.line_col, 0.5)
         self.rect = QtCore.QRectF()
@@ -34,7 +34,6 @@ class Group(QtWidgets.QGraphicsItem):
         return self.rect
 
     def paint(self, painter=None, style=None, widget=None):
-        self.setpolyline()
         painter.setPen(self.pen)
         painter.drawPolyline(self.polyline)
 
@@ -52,13 +51,14 @@ class Group(QtWidgets.QGraphicsItem):
             max(y) - min(y) + 6)
 
 
-class Marker(QtWidgets.QGraphicsItem):
+class Marker(QtWidgets.QGraphicsObject):
     """
     Draggable - https://stackoverflow.com/a/28519324
     """
 
     def __init__(self, parent=None):
         super(Marker, self).__init__(parent)
+        self.parent = parent
         self.fill_col = QtGui.QColor(0, 255, 0, 50)
         self.line_col = QtGui.QColor(0, 255, 0)
         self.pen = QtGui.QPen(self.line_col, 0.5)
@@ -82,22 +82,27 @@ class Marker(QtWidgets.QGraphicsItem):
             painter.drawLine(line)
         painter.fillRect(self.rect, self.fill_col)
 
-    # def mouseMoveEvent(self, event):
-    #     if (QtCore.QLineF(
-    #         QtCore.QPointF(event.screenPos()),
-    #         QtCore.QPointF(event.buttonDownScreenPos(
-    #             QtCore.Qt.LeftButton))).length()
-    #             < QtWidgets.QApplication.startDragDistance()):
-    #         return
-    #     drag = QtGui.QDrag(event.widget())
-    #     drag.exec_()
-    #     self.setCursor(QtCore.Qt.OpenHandCursor)
+    def mouseMoveEvent(self, event):
+        if (QtCore.QLineF(
+            QtCore.QPointF(event.screenPos()),
+            QtCore.QPointF(event.buttonDownScreenPos(
+                QtCore.Qt.LeftButton))).length() <
+                QtWidgets.QApplication.startDragDistance()):
+            return
+        if self.parent:
+            self.parent.setpolyline()
+        drag = QtGui.QDrag(event.widget())
+        drag.exec_()
+        self.setCursor(QtCore.Qt.OpenHandCursor)
+        super(Marker, self).mouseMoveEvent(event)
 
-    # def mousePressEvent(self, event):
-    #     self.setCursor(QtCore.Qt.ClosedHandCursor)
+    def mousePressEvent(self, event):
+        self.setCursor(QtCore.Qt.ClosedHandCursor)
+        super(Marker, self).mousePressEvent(event)
 
-    # def mouseReleaseEvent(self, event):
-    #     self.setCursor(QtCore.Qt.OpenHandCursor)
+    def mouseReleaseEvent(self, event):
+        self.setCursor(QtCore.Qt.OpenHandCursor)
+        super(Marker, self).mouseReleaseEvent(event)
 
 
 class imageLabeler(QtWidgets.QMainWindow):
