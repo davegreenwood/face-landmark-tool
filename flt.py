@@ -1,7 +1,6 @@
 """A simple aplication to label images of faces."""
 import sys
 import json
-import numpy as np
 from pkg_resources import resource_filename
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -34,9 +33,9 @@ class Marker(QtWidgets.QGraphicsPathItem):
     red_pen = QtGui.QPen(QtGui.QColor("red"), 0.5)
     grn_pen = QtGui.QPen(QtGui.QColor("green"), 0.5)
 
-    def __init__(self, annotation_item, index):
+    def __init__(self, group_item, index):
         super(Marker, self).__init__()
-        self.m_annotation_item = annotation_item
+        self.m_group_item = group_item
         self.m_index = index
 
         self.setPath(Marker.cross)
@@ -69,7 +68,7 @@ class Marker(QtWidgets.QGraphicsPathItem):
     def itemChange(self, change, value):
         if (change == QtWidgets.QGraphicsItem.ItemPositionChange and
                 self.isEnabled()):
-            self.m_annotation_item.movePoint(self.m_index, value)
+            self.m_group_item.movePoint(self.m_index, value)
         return super(Marker, self).itemChange(change, value)
 
 
@@ -147,6 +146,7 @@ class LabelerScene(QtWidgets.QGraphicsScene):
         self.image = QtWidgets.QGraphicsPixmapItem()
         self.addItem(self.image)
         self.setSceneRect(QtCore.QRectF(0, 0, WIDTH, HEIGHT))
+        self.groups = []
 
     def add_group(self, pts, label=None):
         group = LineGroup()
@@ -154,6 +154,15 @@ class LabelerScene(QtWidgets.QGraphicsScene):
             group.setToolTip(label)
         self.addItem(group)
         group.add_points(pts)
+        self.groups.append(group)
+        return group
+
+    def print_pos(self):
+        pos = []
+        for group in self.groups:
+            for item in group.m_items:
+                pos.append([item.pos().x(), item.pos().x()])
+        print(pos)
 
     def set_image(self, pixmap=None):
         if pixmap and not pixmap.isNull():
@@ -230,12 +239,16 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         self.aboutAct = QtWidgets.QAction(
             "About", self, triggered=self.about)
         self.fitAct = QtWidgets.QAction(
-            "Fit to view", self, shortcut="Ctrl+F",
+            "View 100%", self, shortcut="Ctrl+F",
             triggered=self.viewer.fitInView)
+        self.printAct = QtWidgets.QAction(
+            "Print Positions", self, shortcut="Ctrl+P",
+            triggered=self.scene.print_pos)
 
         self.fileMenu = QtWidgets.QMenu("File", self)
         self.fileMenu.addAction(self.openAct)
         self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.printAct)
         self.fileMenu.addAction(self.exitAct)
 
         self.viewMenu = QtWidgets.QMenu("View", self)
