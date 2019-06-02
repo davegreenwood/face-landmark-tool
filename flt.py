@@ -1,4 +1,4 @@
-"""A simple aplication to label images of faces."""
+"""A simple application to label images of faces."""
 import sys
 import json
 from pkg_resources import resource_filename
@@ -157,6 +157,9 @@ class LabelerScene(QtWidgets.QGraphicsScene):
         self.groups.append(group)
         return group
 
+    def add_model(self, model):
+        pass
+
     def print_pos(self):
         pos = []
         for group in self.groups:
@@ -234,6 +237,8 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
     def createMenus(self):
         self.openAct = QtWidgets.QAction(
             "Open...", self, shortcut="Ctrl+O", triggered=self.open_image)
+        self.modelAct = QtWidgets.QAction(
+            "Open Model..", self, shortcut="Ctrl+M", triggered=self.open_model)
         self.exitAct = QtWidgets.QAction(
             "Exit", self, shortcut="Ctrl+Q", triggered=self.close)
         self.aboutAct = QtWidgets.QAction(
@@ -247,12 +252,14 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
 
         self.fileMenu = QtWidgets.QMenu("File", self)
         self.fileMenu.addAction(self.openAct)
+        self.fileMenu.addAction(self.modelAct)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.printAct)
         self.fileMenu.addAction(self.exitAct)
 
         self.viewMenu = QtWidgets.QMenu("View", self)
         self.viewMenu.addAction(self.fitAct)
+        self.fileMenu.addSeparator()
 
         self.helpMenu = QtWidgets.QMenu("Help", self)
         self.helpMenu.addAction(self.aboutAct)
@@ -262,12 +269,13 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
 
-    def open_landmarks(self):
+    def open_model(self):
         fname, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, "Open Landmark FIle", QtCore.QDir.currentPath())
         if not fname:
             return
-        self.landmarks = read_json(fname)
+        model = read_json(fname)
+        self.scene.add_model(model)
 
     def open_image(self):
         fname, _ = QtWidgets.QFileDialog.getOpenFileName(
