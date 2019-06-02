@@ -6,6 +6,10 @@ from pkg_resources import resource_filename
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
+WIDTH = 800
+HEIGHT = 800
+
+
 def read_json(fname):
     with open(fname) as fid:
         data = json.load(fid)
@@ -13,7 +17,7 @@ def read_json(fname):
 
 
 class Marker(QtWidgets.QGraphicsPathItem):
-
+    """This class is the point we move to indicate a landmark position."""
     cross = QtGui.QPainterPath()
     cross.addRect(QtCore.QRectF(0, -5, 0, 10))
     cross.addRect(QtCore.QRectF(-5, 0, 10, 0))
@@ -136,6 +140,9 @@ class LabelerScene(QtWidgets.QGraphicsScene):
     """Inherit Graphics Scene to allow adding of LineGroup objects."""
     def __init__(self, parent):
         super(LabelerScene, self).__init__(parent)
+        self.image = QtWidgets.QGraphicsPixmapItem()
+        self.addItem(self.image)
+        self.setSceneRect(QtCore.QRectF(0, 0, WIDTH, HEIGHT))
 
     def add_group(self, pts, label=None):
         group = LineGroup()
@@ -144,6 +151,12 @@ class LabelerScene(QtWidgets.QGraphicsScene):
         self.addItem(group)
         group.add_points(pts)
 
+    def set_image(self, pixmap=None):
+        if pixmap and not pixmap.isNull():
+            self.image.setPixmap(pixmap)
+            self.setSceneRect(QtCore.QRectF(self.image.pixmap().rect()))
+        else:
+            self.image.setPixmap(QtGui.QPixmap())
 
 # -----------------------------------------------------------------------------
 # Graphics View
@@ -152,16 +165,9 @@ class LabelerScene(QtWidgets.QGraphicsScene):
 
 class LabelerView(QtWidgets.QGraphicsView):
 
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super(LabelerView, self).__init__(parent)
-        self.scene = LabelerScene(self)
-        self.setScene(self.scene)
-
-        self.image = QtWidgets.QGraphicsPixmapItem()
-        self.scene.addItem(self.image)
-
-        self.scene.add_group([[10, 20], [20, 30], [30, 40]], "left_eye")
-
+        self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
         self.setRenderHints(QtGui.QPainter.Antialiasing |
                             QtGui.QPainter.SmoothPixmapTransform)
         self.setMouseTracking(True)
@@ -172,21 +178,9 @@ class LabelerView(QtWidgets.QGraphicsView):
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(30, 30, 30)))
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
 
-    def fitInView(self, scale=True):
-        rect = QtCore.QRectF(self.image.pixmap().rect())
-        if not rect.isNull():
-            self.setSceneRect(rect)
+    def fitInView(self):
         self.resetTransform()
         self.scale(1.0, 1.0)
-
-    def setPhoto(self, pixmap=None):
-        if pixmap and not pixmap.isNull():
-            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
-            self.image.setPixmap(pixmap)
-        else:
-            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-            self.image.setPixmap(QtGui.QPixmap())
-        self.fitInView()
 
     def wheelEvent(self, event):
         if event.angleDelta().y() > 0:
@@ -203,7 +197,7 @@ class LabelerView(QtWidgets.QGraphicsView):
 
 
 # -----------------------------------------------------------------------------
-# Window Class
+# Main Window
 # -----------------------------------------------------------------------------
 
 
@@ -212,11 +206,18 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(imageLabelerWindow, self).__init__()
-        self.viewer = LabelerView(self)
+
+        self.scene = LabelerScene(self)
+        self.scene.add_group([[10, 20], [20, 30], [30, 40]], "left_eye")
+        self.scene.add_group([[50, 60], [70, 80], [90, 100]], "right_eye")
+
+        self.viewer = LabelerView()
+        self.viewer.setScene(self.scene)
         self.setCentralWidget(self.viewer)
+
         self.createMenus()
         self.setWindowTitle("Face Label Tool (FLT)")
-        self.resize(800, 800)
+        self.resize(WIDTH, HEIGHT)
         self.show()
 
     def about(self):
@@ -262,13 +263,12 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
             self, "Open Image", QtCore.QDir.currentPath())
         if not fname:
             return
-
         image = QtGui.QImage(fname)
         if image.isNull():
             QtWidgets.QMessageBox.information(
                 self, "Image Viewer", "Cannot load %s." % fname)
             return
-        self.viewer.setPhoto(QtGui.QPixmap.fromImage(image))
+        self.scene.set_image(QtGui.QPixmap.fromImage(image))
 
 
 if __name__ == '__main__':
