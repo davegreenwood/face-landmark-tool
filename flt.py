@@ -6,6 +6,10 @@ from pkg_resources import resource_filename
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
+# -----------------------------------------------------------------------------
+# Constants
+# -----------------------------------------------------------------------------
+
 WIDTH = 800
 HEIGHT = 800
 
@@ -188,12 +192,6 @@ class LabelerView(QtWidgets.QGraphicsView):
         else:
             factor = 0.8
         self.scale(factor, factor)
-
-    def toggleDragMode(self):
-        if self.dragMode() == QtWidgets.QGraphicsView.ScrollHandDrag:
-            self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
-        elif not self.image.pixmap().isNull():
-            self.setDragMode(QtWidgets.QGraphicsView.ScrollHandDrag)
 
 
 # -----------------------------------------------------------------------------
