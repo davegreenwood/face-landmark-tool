@@ -28,21 +28,23 @@ class Marker(QtWidgets.QGraphicsPathItem):
 
     red_pen = QtGui.QPen(QtGui.QColor("red"), 0.5)
     grn_pen = QtGui.QPen(QtGui.QColor("green"), 0.5)
+    yel_pen = QtGui.QPen(QtGui.QColor("yellow"), 0.5)
 
     def __init__(self, group_item, index):
         super(Marker, self).__init__()
         self.m_group_item = group_item
         self.m_index = index
+        self.default_pen = Marker.yel_pen if index == 0 else Marker.grn_pen
 
         self.setPath(Marker.cross)
         self.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
-        self.setPen(self.grn_pen)
+        self.setPen(self.default_pen)
 
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QtWidgets.QGraphicsItem.ItemSendsGeometryChanges, True)
         self.setAcceptHoverEvents(True)
-        self.setZValue(11)
+        self.setZValue(20)
         self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
     def hoverEnterEvent(self, event):
@@ -53,7 +55,7 @@ class Marker(QtWidgets.QGraphicsPathItem):
 
     def hoverLeaveEvent(self, event):
         self.setPath(Marker.cross)
-        self.setPen(self.grn_pen)
+        self.setPen(self.default_pen)
         self.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
         super(Marker, self).hoverLeaveEvent(event)
 
