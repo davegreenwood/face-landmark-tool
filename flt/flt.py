@@ -123,6 +123,13 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
             item.setPos(pos)
             item.setEnabled(True)
 
+    def shape(self):
+        qp = QtGui.QPainterPathStroker()
+        qp.setWidth(MARGIN)
+        qp.setCapStyle(QtCore.Qt.SquareCap)
+        shape = qp.createStroke(self.path())
+        return shape
+
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
             for i, point in enumerate(self.m_points):
@@ -339,6 +346,7 @@ def main():
     app.setWindowIcon(QtGui.QIcon(path))
     ui = imageLabelerWindow()
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()
