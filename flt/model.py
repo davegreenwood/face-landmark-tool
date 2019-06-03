@@ -1,4 +1,17 @@
 """construct landmark models """
+import json
+
+
+def read_json(fname):
+    with open(fname) as fid:
+        data = json.load(fid)
+    return data
+
+
+def write_json(model, fname):
+    with open(fname, "w") as fid:
+        json.dump(model, fid)
+
 
 index = dict(
     jaw=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
@@ -11,11 +24,12 @@ index = dict(
     mouth_outer=[48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59],
     mouth_inner=[60, 61, 62, 63, 64, 65, 66, 67],
     left_pupil=[68],
-    right_pupil=[69]
-)
+    right_pupil=[69])
+
 
 keys = ["jaw", "left_brow", "right_brow", "nose_bridge", "nose_lower",
         "left_eye", "right_eye", "mouth_outer", "mouth_inner"]
+
 
 pos = [
     # jaw
@@ -50,4 +64,9 @@ pos = [
     [474., 277.]
     ]
 
+
 model = dict(pos=pos, index=index, keys=keys)
+
+
+if __name__ == "__main__":
+    write_json(model, "model.json")
