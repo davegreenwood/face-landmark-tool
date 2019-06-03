@@ -51,5 +51,3 @@ pos = [
     ]
 
 model = dict(pos=pos, index=index, keys=keys)
-
-print([pos[i] for i in index["jaw"]])
