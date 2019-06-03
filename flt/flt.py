@@ -101,6 +101,12 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
         self.m_items.append(item)
         item.setPos(p)
 
+    def delete_markers(self):
+        while self.m_items:
+            item = self.m_items.pop(0)
+            self.scene().removeItem(item)
+            del item
+
     def add_points(self, pts):
         for x, y in pts:
             self.addPoint(QtCore.QPointF(x, y))
@@ -140,15 +146,21 @@ class Model(object):
         self.groups = []
         # while testing...
         self.load_model()
-        # self.add_group([[10, 20], [20, 30], [30, 40]], "left_eye")
-        # self.add_group([[50, 60], [70, 80], [90, 100]], "right_eye")
 
     def load_model(self, model_dict=model):
-        index = model_dict["index"]
-        pos = model_dict["pos"]
-        keys = model_dict["keys"]
-        for key in keys:
-            self.add_group([pos[i] for i in index[key]], key)
+        self.delete_model()
+        self.index = model_dict["index"]
+        self.positions = model_dict["pos"]
+        self.keys = model_dict["keys"]
+        for key in self.keys:
+            self.add_group([self.positions[i] for i in self.index[key]], key)
+
+    def delete_model(self):
+        while self.groups:
+            group = self.groups.pop(0)
+            group.delete_markers()
+            self.scene.removeItem(group)
+            del group
 
     def add_group(self, pts, label=None):
         group = LineGroup()
