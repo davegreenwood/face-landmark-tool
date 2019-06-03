@@ -4,7 +4,7 @@ import json
 from pkg_resources import resource_filename
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from model import model
+from .model import model
 
 # -----------------------------------------------------------------------------
 # Constants
