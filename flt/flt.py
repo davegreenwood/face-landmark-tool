@@ -1,23 +1,18 @@
 """A simple application to label images of faces."""
 import sys
-import json
 from pkg_resources import resource_filename
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .model import model
+from .model import model, read_json, write_json
 
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
 
+
 WIDTH = 800
 HEIGHT = 800
-
-
-def read_json(fname):
-    with open(fname) as fid:
-        data = json.load(fid)
-    return data
+MARGIN = 10
 
 
 class Marker(QtWidgets.QGraphicsPathItem):
