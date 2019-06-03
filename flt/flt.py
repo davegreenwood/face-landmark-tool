@@ -171,12 +171,20 @@ class Model(object):
         self.groups.append(group)
         return group
 
-    def print_pos(self):
-        pos = []
+    def get_positions(self):
+        self.positions = []
         for group in self.groups:
             for item in group.m_items:
-                pos.append([item.pos().x(), item.pos().y()])
-        print(pos)
+                self.positions.append([item.pos().x(), item.pos().y()])
+
+    def print_pos(self):
+        self.get_positions()
+        print(self.positions)
+
+    def to_dict(self):
+        self.get_positions()
+        return dict(index=self.index, keys=self.keys, pos=self.positions)
+
 
 # -----------------------------------------------------------------------------
 # Graphics Scene
@@ -263,6 +271,8 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
             "Open...", self, shortcut="Ctrl+O", triggered=self.open_img)
         self.modelAct = QtWidgets.QAction(
             "Open Model...", self, shortcut="Ctrl+M", triggered=self.open_mdl)
+        self.saveAct = QtWidgets.QAction(
+            "Save Model...", self, shortcut="Ctrl+S", triggered=self.save_mdl)
         self.exitAct = QtWidgets.QAction(
             "Exit", self, shortcut="Ctrl+Q", triggered=self.close)
         self.aboutAct = QtWidgets.QAction(
@@ -278,6 +288,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         self.fileMenu.addAction(self.openAct)
         self.fileMenu.addAction(self.modelAct)
         self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.saveAct)
         self.fileMenu.addAction(self.printAct)
         self.fileMenu.addAction(self.exitAct)
 
@@ -300,6 +311,14 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
             return
         model = read_json(fname)
         self.scene.model.load_model(model)
+
+    def save_mdl(self):
+        fname, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Save Model File", QtCore.QDir.currentPath())
+        if not fname:
+            return
+        model = self.scene.model.to_dict()
+        write_json(model, fname)
 
     def open_img(self):
         fname, _ = QtWidgets.QFileDialog.getOpenFileName(
