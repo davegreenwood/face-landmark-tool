@@ -4,6 +4,7 @@ import json
 from pkg_resources import resource_filename
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from model import model
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -134,6 +135,40 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
         super(LineGroup, self).hoverLeaveEvent(event)
 
 
+class Model(object):
+    """Landmarking model"""
+    def __init__(self, scene=None):
+        super(Model, self).__init__()
+        self.scene = scene
+        self.groups = []
+        # while testing...
+        self.load_model()
+        # self.add_group([[10, 20], [20, 30], [30, 40]], "left_eye")
+        # self.add_group([[50, 60], [70, 80], [90, 100]], "right_eye")
+
+    def load_model(self, model_dict=model):
+        index = model_dict["index"]
+        pos = model_dict["pos"]
+        keys = model_dict["keys"]
+        for key in keys:
+            self.add_group([pos[i] for i in index[key]], key)
+
+    def add_group(self, pts, label=None):
+        group = LineGroup()
+        if label:
+            group.setToolTip(label)
+        self.scene.addItem(group)
+        group.add_points(pts)
+        self.groups.append(group)
+        return group
+
+    def print_pos(self):
+        pos = []
+        for group in self.groups:
+            for item in group.m_items:
+                pos.append([item.pos().x(), item.pos().y()])
+        print(pos)
+
 # -----------------------------------------------------------------------------
 # Graphics Scene
 # -----------------------------------------------------------------------------
@@ -144,28 +179,9 @@ class LabelerScene(QtWidgets.QGraphicsScene):
     def __init__(self, parent):
         super(LabelerScene, self).__init__(parent)
         self.image = QtWidgets.QGraphicsPixmapItem()
+        self.model = Model(scene=self)
         self.addItem(self.image)
         self.setSceneRect(QtCore.QRectF(0, 0, WIDTH, HEIGHT))
-        self.groups = []
-
-    def add_group(self, pts, label=None):
-        group = LineGroup()
-        if label:
-            group.setToolTip(label)
-        self.addItem(group)
-        group.add_points(pts)
-        self.groups.append(group)
-        return group
-
-    def add_model(self, model):
-        pass
-
-    def print_pos(self):
-        pos = []
-        for group in self.groups:
-            for item in group.m_items:
-                pos.append([item.pos().x(), item.pos().x()])
-        print(pos)
 
     def set_image(self, pixmap=None):
         if pixmap and not pixmap.isNull():
@@ -173,6 +189,7 @@ class LabelerScene(QtWidgets.QGraphicsScene):
             self.setSceneRect(QtCore.QRectF(self.image.pixmap().rect()))
         else:
             self.image.setPixmap(QtGui.QPixmap())
+
 
 # -----------------------------------------------------------------------------
 # Graphics View
@@ -218,8 +235,6 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         super(imageLabelerWindow, self).__init__()
 
         self.scene = LabelerScene(self)
-        self.scene.add_group([[10, 20], [20, 30], [30, 40]], "left_eye")
-        self.scene.add_group([[50, 60], [70, 80], [90, 100]], "right_eye")
 
         self.viewer = LabelerView()
         self.viewer.setScene(self.scene)
@@ -248,7 +263,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
             triggered=self.viewer.fitInView)
         self.printAct = QtWidgets.QAction(
             "Print Positions", self, shortcut="Ctrl+P",
-            triggered=self.scene.print_pos)
+            triggered=self.scene.model.print_pos)
 
         self.fileMenu = QtWidgets.QMenu("File", self)
         self.fileMenu.addAction(self.openAct)
@@ -275,7 +290,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         if not fname:
             return
         model = read_json(fname)
-        self.scene.add_model(model)
+        self.scene.model.load_model(model)
 
     def open_img(self):
         fname, _ = QtWidgets.QFileDialog.getOpenFileName(
@@ -290,9 +305,12 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         self.scene.set_image(QtGui.QPixmap.fromImage(image))
 
 
-if __name__ == '__main__':
+def main():
     app = QtWidgets.QApplication(["Face Label Tool"] + sys.argv[1:])
-    path = resource_filename(__name__, "icon.png")
+    path = resource_filename(__name__, "data/icon.png")
     app.setWindowIcon(QtGui.QIcon(path))
     ui = imageLabelerWindow()
     sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
