@@ -300,7 +300,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
 
     def about(self):
         msg = """Face Label Tool Help:"""
-        QtWidgets.QMessageBox.about(self, "About Image Viewer", msg)
+        QtWidgets.QMessageBox.about(self, "About Face Label Tool", msg)
 
     def createMenus(self):
         self.openAct = QtWidgets.QAction(
@@ -365,7 +365,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         image = QtGui.QImage(fname)
         if image.isNull():
             QtWidgets.QMessageBox.information(
-                self, "Image Viewer", "Cannot load %s." % fname)
+                self, "Face Label Tool", "Cannot load %s." % fname)
             return
         self.scene.set_image(fname)
 
