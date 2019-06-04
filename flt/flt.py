@@ -15,6 +15,11 @@ HEIGHT = 800
 MARGIN = 10
 
 
+# -----------------------------------------------------------------------------
+# Model
+# -----------------------------------------------------------------------------
+
+
 class Marker(QtWidgets.QGraphicsPathItem):
     """This class is the point we move to indicate a landmark position."""
     cross = QtGui.QPainterPath()
@@ -68,6 +73,13 @@ class Marker(QtWidgets.QGraphicsPathItem):
                 self.isEnabled()):
             self.m_group_item.movePoint(self.m_index, value)
         return super(Marker, self).itemChange(change, value)
+
+    def shape(self):
+        qp = QtGui.QPainterPathStroker()
+        qp.setWidth(MARGIN)
+        qp.setCapStyle(QtCore.Qt.SquareCap)
+        shape = qp.createStroke(self.path())
+        return shape
 
 
 class LineGroup(QtWidgets.QGraphicsPathItem):
