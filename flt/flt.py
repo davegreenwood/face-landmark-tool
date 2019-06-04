@@ -1,5 +1,6 @@
 """A simple application to label images of faces."""
 import sys
+import os
 from pkg_resources import resource_filename
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -304,7 +305,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
 
     def createMenus(self):
         self.openAct = QtWidgets.QAction(
-            "Open...", self, shortcut="Ctrl+O", triggered=self.open_img)
+            "Open Image...", self, shortcut="Ctrl+O", triggered=self.open_img)
         self.modelAct = QtWidgets.QAction(
             "Open Model...", self, shortcut="Ctrl+M", triggered=self.open_mdl)
         self.saveAct = QtWidgets.QAction(
@@ -349,8 +350,9 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         self.scene.model.load_model(model)
 
     def save_mdl(self):
+        default_name = os.path.join(QtCore.QDir.currentPath(), "model.json")
         fname, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Save Model File", QtCore.QDir.currentPath())
+            self, "Save Model File", default_name, "JSON file (*.json)")
         if not fname:
             return
         model = self.scene.model.to_dict()
