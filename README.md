@@ -1,4 +1,4 @@
-# FLT Face Landmark Tool
+# Face Landmark Tool
 
 A simple application for labelling facial landmarks. Although this may grow, the
 key features are:
