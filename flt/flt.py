@@ -164,7 +164,7 @@ class Model(object):
         super(Model, self).__init__()
         self.scene = scene
         self.groups = []
-        # while testing...
+        self.positions = []
         self.load_model()
 
     def load_model(self, model_dict=model):
