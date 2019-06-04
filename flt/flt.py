@@ -233,6 +233,7 @@ class LabelerScene(QtWidgets.QGraphicsScene):
 
 
 class LabelerView(QtWidgets.QGraphicsView):
+    factor = 1.25
 
     def __init__(self, parent=None):
         super(LabelerView, self).__init__(parent)
@@ -246,6 +247,23 @@ class LabelerView(QtWidgets.QGraphicsView):
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(30, 30, 30)))
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+="),
+                            self, activated=self.zoomIn)
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+-"),
+                            self, activated=self.zoomOut)
+
+    @QtCore.pyqtSlot()
+    def zoomIn(self):
+        self.zoom(LabelerView.factor)
+
+    @QtCore.pyqtSlot()
+    def zoomOut(self):
+        self.zoom(1. / LabelerView.factor)
+
+    def zoom(self, factor):
+        self.scale(factor, factor)
+        if self.scene() is not None:
+            self.centerOn(self.scene().image)
 
     def fitInView(self):
         self.resetTransform()
@@ -253,10 +271,9 @@ class LabelerView(QtWidgets.QGraphicsView):
 
     def wheelEvent(self, event):
         if event.angleDelta().y() > 0:
-            factor = 1.25
+            self.zoomIn()
         else:
-            factor = 0.8
-        self.scale(factor, factor)
+            self.zoomOut()
 
 
 # -----------------------------------------------------------------------------
