@@ -197,10 +197,6 @@ class Model(object):
             for item in group.m_items:
                 self.positions.append([item.pos().x(), item.pos().y()])
 
-    def print_pos(self):
-        self.get_positions()
-        print(self.positions)
-
     def to_dict(self):
         self.get_positions()
         return dict(index=self.index, keys=self.keys, pos=self.positions)
@@ -216,16 +212,19 @@ class LabelerScene(QtWidgets.QGraphicsScene):
     def __init__(self, parent):
         super(LabelerScene, self).__init__(parent)
         self.image = QtWidgets.QGraphicsPixmapItem()
+        self.image_fname = "None"
         self.model = Model(scene=self)
         self.addItem(self.image)
         self.setSceneRect(QtCore.QRectF(0, 0, WIDTH, HEIGHT))
 
-    def set_image(self, pixmap=None):
-        if pixmap and not pixmap.isNull():
-            self.image.setPixmap(pixmap)
-            self.setSceneRect(QtCore.QRectF(self.image.pixmap().rect()))
-        else:
-            self.image.setPixmap(QtGui.QPixmap())
+    def print_pos(self):
+        self.model.get_positions()
+        print(self.image_fname, ":", self.model.positions)
+
+    def set_image(self, fname):
+        self.image.setPixmap(QtGui.QPixmap(fname))
+        self.setSceneRect(self.image.boundingRect())
+        _, self.image_fname = os.path.split(fname)
 
 
 # -----------------------------------------------------------------------------
@@ -319,7 +318,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
             triggered=self.viewer.fitInView)
         self.printAct = QtWidgets.QAction(
             "Print Positions", self, shortcut="Ctrl+P",
-            triggered=self.scene.model.print_pos)
+            triggered=self.scene.print_pos)
 
         self.fileMenu = QtWidgets.QMenu("File", self)
         self.fileMenu.addAction(self.openAct)
@@ -368,7 +367,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.information(
                 self, "Image Viewer", "Cannot load %s." % fname)
             return
-        self.scene.set_image(QtGui.QPixmap.fromImage(image))
+        self.scene.set_image(fname)
 
 
 def main():
