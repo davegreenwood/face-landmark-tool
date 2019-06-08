@@ -160,6 +160,7 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
 
 class Model(object):
     """Landmarking model"""
+
     def __init__(self, scene=None):
         super(Model, self).__init__()
         self.scene = scene
@@ -181,6 +182,14 @@ class Model(object):
             group.delete_markers()
             self.scene.removeItem(group)
             del group
+
+    def select_model(self):
+        for group in self.groups:
+            group.setSelected(True)
+
+    def deselect_model(self):
+        for group in self.groups:
+            group.setSelected(False)
 
     def add_group(self, pts, label=None):
         group = LineGroup()
@@ -313,6 +322,12 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
             "Exit", self, shortcut="Ctrl+Q", triggered=self.close)
         self.aboutAct = QtWidgets.QAction(
             "About", self, triggered=self.about)
+        self.selectAct = QtWidgets.QAction(
+            "Select Model", self, shortcut="Ctrl+A",
+            triggered=self.scene.model.select_model)
+        self.deselectAct = QtWidgets.QAction(
+            "Deselect Model", self, shortcut="Ctrl+D",
+            triggered=self.scene.model.deselect_model)
         self.fitAct = QtWidgets.QAction(
             "View 100%", self, shortcut="Ctrl+F",
             triggered=self.viewer.fitInView)
@@ -328,6 +343,10 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         self.fileMenu.addAction(self.printAct)
         self.fileMenu.addAction(self.exitAct)
 
+        self.editMenu = QtWidgets.QMenu("Edit", self)
+        self.editMenu.addAction(self.selectAct)
+        self.editMenu.addAction(self.deselectAct)
+
         self.viewMenu = QtWidgets.QMenu("View", self)
         self.viewMenu.addAction(self.fitAct)
         self.viewMenu.addSeparator()
@@ -335,8 +354,9 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
         self.helpMenu = QtWidgets.QMenu("Help", self)
         self.helpMenu.addAction(self.aboutAct)
 
-        self.menuBar().setNativeMenuBar(True)
+        self.menuBar().setNativeMenuBar(False)
         self.menuBar().addMenu(self.fileMenu)
+        self.menuBar().addMenu(self.editMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
 
