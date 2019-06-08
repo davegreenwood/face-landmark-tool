@@ -330,7 +330,7 @@ class imageLabelerWindow(QtWidgets.QMainWindow):
 
         self.viewMenu = QtWidgets.QMenu("View", self)
         self.viewMenu.addAction(self.fitAct)
-        self.fileMenu.addSeparator()
+        self.viewMenu.addSeparator()
 
         self.helpMenu = QtWidgets.QMenu("Help", self)
         self.helpMenu.addAction(self.aboutAct)
