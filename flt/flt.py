@@ -290,11 +290,11 @@ class LabelerView(QtWidgets.QGraphicsView):
 # -----------------------------------------------------------------------------
 
 
-class imageLabelerWindow(QtWidgets.QMainWindow):
+class ImageLabelerWindow(QtWidgets.QMainWindow):
     """The main application window with menu items."""
 
     def __init__(self):
-        super(imageLabelerWindow, self).__init__()
+        super(ImageLabelerWindow, self).__init__()
 
         self.scene = LabelerScene(self)
 
@@ -394,7 +394,7 @@ def main():
     app = QtWidgets.QApplication(["Face Label Tool"] + sys.argv[1:])
     path = resource_filename(__name__, "data/icon.png")
     app.setWindowIcon(QtGui.QIcon(path))
-    ui = imageLabelerWindow()
+    _ = ImageLabelerWindow()
     sys.exit(app.exec_())
 
 
