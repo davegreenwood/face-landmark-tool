@@ -46,16 +46,10 @@ class Marker(QtWidgets.QGraphicsPathItem):
     square.addRect(QtCore.QRectF(0, -5, 0, 10))
     square.addRect(QtCore.QRectF(-5, 0, 10, 0))
 
-    red_pen = QtGui.QPen(QtGui.QColor("red"), 0.5)
-    grn_pen = QtGui.QPen(QtGui.QColor("green"), 0.5)
-    yel_pen = QtGui.QPen(QtGui.QColor("yellow"), 0.5)
-
     def __init__(self, group_item, index):
         super(Marker, self).__init__()
         self.m_group_item = group_item
         self.m_index = index
-        self.default_pen = Marker.yel_pen if index == 0 else Marker.grn_pen
-
         self.setPath(Marker.cross)
         self.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
         self.setPen(self.default_pen)
@@ -70,14 +64,14 @@ class Marker(QtWidgets.QGraphicsPathItem):
     def hoverEnterEvent(self, event):
         """Override super."""
         self.setPath(Marker.square)
-        self.setPen(self.red_pen)
+        self.setPen(Pen.red_pen)
         self.setBrush(QtGui.QColor(255, 0, 0, 32))
         super(Marker, self).hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
         """Override super."""
         self.setPath(Marker.cross)
-        self.setPen(self.default_pen)
+        self.setPen(self.default_pen())
         self.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
         super(Marker, self).hoverLeaveEvent(event)
 
@@ -104,12 +98,10 @@ class Marker(QtWidgets.QGraphicsPathItem):
 
 class LineGroup(QtWidgets.QGraphicsPathItem):
     """This class groups the points to semantic regions, eg: right eye... """
-    red_pen = QtGui.QPen(QtGui.QColor("red"), 0.5)
-    grn_pen = QtGui.QPen(QtGui.QColor("green"), 0.5)
 
     def __init__(self, parent=None):
         super(LineGroup, self).__init__(parent)
-        self.setPen(self.grn_pen)
+        self.setPen(Pen.grn_pen)
         self.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
         self.setZValue(10)
         self.setAcceptHoverEvents(True)
@@ -178,12 +170,12 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
 
     def hoverEnterEvent(self, event):
         """Override super."""
-        self.setPen(self.red_pen)
+        self.setPen(Pen.red_pen)
         super(LineGroup, self).hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
         """Override super."""
-        self.setPen(self.grn_pen)
+        self.setPen(Pen.grn_pen)
         super(LineGroup, self).hoverLeaveEvent(event)
 
 
