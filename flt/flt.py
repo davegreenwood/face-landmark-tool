@@ -233,11 +233,8 @@ class Model:
 
     def scale_model(self, factor):
         """Scale the model by a factor."""
-        for group in self.groups:
-            for i, pos in enumerate(group.m_points):
-                pos *= factor
-                group.move_item(i, pos)
-            group.set_path()
+        pos = [[factor * p[0], factor * p[1]] for p in self.get_positions()]
+        self.load_model(dict(index=self.index, keys=self.keys, pos=pos))
 
     def add_group(self, pts, label=None):
         """Add a new group to the model."""
@@ -255,11 +252,12 @@ class Model:
         for group in self.groups:
             for item in group.m_items:
                 self.positions.append([item.pos().x(), item.pos().y()])
+        return self.positions
 
     def to_dict(self):
         """Return a dictionary of the model."""
-        self.get_positions()
-        return dict(index=self.index, keys=self.keys, pos=self.positions)
+        return dict(index=self.index, keys=self.keys,
+                    pos=self.get_positions())
 
     def update(self):
         """Redraw the model as soon as possilble."""
