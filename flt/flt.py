@@ -210,6 +210,14 @@ class Model:
         for group in self.groups:
             group.setSelected(False)
 
+    def scale_model(self, factor):
+        """Scale the model by a factor."""
+        for group in self.groups:
+            for i, pos in enumerate(group.m_points):
+                pos *= factor
+                group.move_item(i, pos)
+            group.set_path()
+
     def add_group(self, pts, label=None):
         """Add a new group to the model."""
         group = LineGroup()
@@ -240,6 +248,7 @@ class Model:
 
 class LabelerScene(QtWidgets.QGraphicsScene):
     """Inherit Graphics Scene to allow adding of LineGroup objects."""
+
     def __init__(self, parent):
         super(LabelerScene, self).__init__(parent)
         self.image = QtWidgets.QGraphicsPixmapItem()
@@ -287,6 +296,23 @@ class LabelerView(QtWidgets.QGraphicsView):
                             self, activated=self.zoomIn)
         QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+-"),
                             self, activated=self.zoomOut)
+
+        QtWidgets.QShortcut(QtGui.QKeySequence("Alt+="),
+                            self, activated=self.scale_up)
+        QtWidgets.QShortcut(QtGui.QKeySequence("Alt+-"),
+                            self, activated=self.scale_down)
+
+    @QtCore.pyqtSlot()
+    def scale_up(self):
+        """Zoom in."""
+        f = LabelerView.factor
+        self.scene().model.scale_model(f)
+
+    @QtCore.pyqtSlot()
+    def scale_down(self):
+        """Zoom out."""
+        f = 1. / LabelerView.factor
+        self.scene().model.scale_model(f)
 
     @QtCore.pyqtSlot()
     def zoomIn(self):
