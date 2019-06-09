@@ -173,13 +173,14 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
         super(LineGroup, self).hoverLeaveEvent(event)
 
 
-class Model(object):
+class Model:
     """Landmarking model"""
 
     def __init__(self, scene=None):
         super(Model, self).__init__()
         self.scene = scene
         self.groups = []
+        self.positions = []
         self.load_model()
 
     def load_model(self, model_dict=model):
@@ -303,7 +304,7 @@ class LabelerView(QtWidgets.QGraphicsView):
         if self.scene() is not None:
             self.centerOn(self.scene().image)
 
-    def fitInView(self, *args):
+    def fitInView(self):
         """Fit to 100 %"""
         self.resetTransform()
         self.scale(1.0, 1.0)
@@ -326,13 +327,10 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(ImageLabelerWindow, self).__init__()
-
         self.scene = LabelerScene(self)
-
         self.viewer = LabelerView()
         self.viewer.setScene(self.scene)
         self.setCentralWidget(self.viewer)
-
         self.createMenus()
         self.setWindowTitle("Face Label Tool (FLT)")
         self.resize(WIDTH, HEIGHT)
