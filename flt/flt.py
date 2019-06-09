@@ -99,6 +99,11 @@ class Marker(QtWidgets.QGraphicsPathItem):
         shape = qp.createStroke(self.path())
         return shape
 
+    def update(self):
+        """Override super."""
+        self.setPen(self.default_pen())
+        super(Marker, self).update()
+
 
 class LineGroup(QtWidgets.QGraphicsPathItem):
     """This class groups the points to semantic regions, eg: right eye... """
@@ -182,6 +187,13 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
         self.setPen(Pen.grn_pen)
         super(LineGroup, self).hoverLeaveEvent(event)
 
+    def update(self):
+        """Override super"""
+        self.setPen(Pen.grn_pen)
+        for item in self.m_items:
+            item.update()
+        super(LineGroup, self).update()
+
 
 class Model:
     """Landmarking model"""
@@ -250,6 +262,11 @@ class Model:
         self.get_positions()
         return dict(index=self.index, keys=self.keys, pos=self.positions)
 
+    def update(self):
+        """Redraw the model as soon as possilble."""
+        for group in self.groups:
+            group.update()
+
 
 # -----------------------------------------------------------------------------
 # Graphics Scene
@@ -279,6 +296,11 @@ class LabelerScene(QtWidgets.QGraphicsScene):
         self.image.setPixmap(QtGui.QPixmap(fname))
         self.setSceneRect(self.image.boundingRect())
         _, self.image_fname = os.path.split(fname)
+
+    def update(self):
+        """Override super"""
+        self.model.update()
+        super(LabelerScene, self).update()
 
 
 # -----------------------------------------------------------------------------
@@ -312,6 +334,11 @@ class LabelerView(QtWidgets.QGraphicsView):
         QtWidgets.QShortcut(QtGui.QKeySequence("Alt+-"),
                             self, activated=self.scale_down)
 
+
+    def update(self):
+        """update the view"""
+        self.scene().update()
+        super(LabelerView, self).update()
     @QtCore.pyqtSlot()
     def scale_up(self):
         """Zoom in."""
