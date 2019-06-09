@@ -428,8 +428,14 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
 
     def about(self):
         """Show help. """
-        msg = """Face Label Tool Help:"""
-        QtWidgets.QMessageBox.about(self, "About Face Label Tool", msg)
+        msg = (
+            'Zoom using "Ctrl +" and "Ctrl -" or scroll\n' +
+            'Select all with "Ctrl A", deslect with "Ctrl D"\n' +
+            '"Ctrl" click to add to selection\n' +
+            'Scale model using "Alt +" and "Alt -"\n' +
+            'Set line width with "Ctrl 1", "Ctrl 2", "Ctrl 3"\n')
+
+        QtWidgets.QMessageBox.about(self, "Hotkeys", msg)
 
     def createMenus(self):
         """Build the menus."""
@@ -442,7 +448,7 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
         exit_act = QtWidgets.QAction(
             "Exit", self, shortcut="Ctrl+Q", triggered=self.close)
         about_act = QtWidgets.QAction(
-            "About", self, triggered=self.about)
+            "Hotkeys", self, triggered=self.about)
         select_act = QtWidgets.QAction(
             "Select Model", self, shortcut="Ctrl+A",
             triggered=self.scene.model.select_model)
