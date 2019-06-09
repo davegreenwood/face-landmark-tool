@@ -274,7 +274,7 @@ class LabelerView(QtWidgets.QGraphicsView):
         if self.scene() is not None:
             self.centerOn(self.scene().image)
 
-    def fitInView(self):
+    def fitInView(self, *args):
         self.resetTransform()
         self.scale(1.0, 1.0)
 
