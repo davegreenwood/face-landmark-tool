@@ -28,7 +28,6 @@ class Pen:
         cls.red_pen = QtGui.QPen(QtGui.QColor("red"), cls.line)
         cls.grn_pen = QtGui.QPen(QtGui.QColor("green"), cls.line)
         cls.yel_pen = QtGui.QPen(QtGui.QColor("yellow"), cls.line)
-        print(cls.line)
 
 # -----------------------------------------------------------------------------
 # Model
