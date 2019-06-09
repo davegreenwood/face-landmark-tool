@@ -399,8 +399,8 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
             self, "Open Model File", QtCore.QDir.currentPath())
         if not fname:
             return
-        model = read_json(fname)
-        self.scene.model.load_model(model)
+        model_in = read_json(fname)
+        self.scene.model.load_model(model_in)
 
     def save_mdl(self):
         """Save a model using the file dialogue."""
@@ -409,8 +409,8 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
             self, "Save Model File", default_name, "JSON file (*.json)")
         if not fname:
             return
-        model = self.scene.model.to_dict()
-        write_json(model, fname)
+        model_out = self.scene.model.to_dict()
+        write_json(model_out, fname)
 
     def open_img(self):
         """Open an image using the file dialogue."""
