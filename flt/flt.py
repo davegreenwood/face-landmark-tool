@@ -343,47 +343,47 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
 
     def createMenus(self):
         """Build the menus."""
-        self.openAct = QtWidgets.QAction(
+        open_act = QtWidgets.QAction(
             "Open Image...", self, shortcut="Ctrl+O", triggered=self.open_img)
-        self.modelAct = QtWidgets.QAction(
+        model_act = QtWidgets.QAction(
             "Open Model...", self, shortcut="Ctrl+M", triggered=self.open_mdl)
-        self.saveAct = QtWidgets.QAction(
+        save_act = QtWidgets.QAction(
             "Save Model...", self, shortcut="Ctrl+S", triggered=self.save_mdl)
-        self.exitAct = QtWidgets.QAction(
+        exit_act = QtWidgets.QAction(
             "Exit", self, shortcut="Ctrl+Q", triggered=self.close)
-        self.aboutAct = QtWidgets.QAction(
+        about_act = QtWidgets.QAction(
             "About", self, triggered=self.about)
-        self.selectAct = QtWidgets.QAction(
+        select_act = QtWidgets.QAction(
             "Select Model", self, shortcut="Ctrl+A",
             triggered=self.scene.model.select_model)
-        self.deselectAct = QtWidgets.QAction(
+        deselect_act = QtWidgets.QAction(
             "Deselect Model", self, shortcut="Ctrl+D",
             triggered=self.scene.model.deselect_model)
-        self.fitAct = QtWidgets.QAction(
+        fitAct = QtWidgets.QAction(
             "View 100%", self, shortcut="Ctrl+F",
             triggered=self.viewer.fitInView)
-        self.printAct = QtWidgets.QAction(
+        printAct = QtWidgets.QAction(
             "Print Positions", self, shortcut="Ctrl+P",
             triggered=self.scene.print_pos)
 
         self.fileMenu = QtWidgets.QMenu("File", self)
-        self.fileMenu.addAction(self.openAct)
-        self.fileMenu.addAction(self.modelAct)
+        self.fileMenu.addAction(open_act)
+        self.fileMenu.addAction(model_act)
         self.fileMenu.addSeparator()
-        self.fileMenu.addAction(self.saveAct)
-        self.fileMenu.addAction(self.printAct)
-        self.fileMenu.addAction(self.exitAct)
+        self.fileMenu.addAction(save_act)
+        self.fileMenu.addAction(printAct)
+        self.fileMenu.addAction(exit_act)
 
         self.editMenu = QtWidgets.QMenu("Edit", self)
-        self.editMenu.addAction(self.selectAct)
-        self.editMenu.addAction(self.deselectAct)
+        self.editMenu.addAction(select_act)
+        self.editMenu.addAction(deselect_act)
 
         self.viewMenu = QtWidgets.QMenu("View", self)
-        self.viewMenu.addAction(self.fitAct)
+        self.viewMenu.addAction(fitAct)
         self.viewMenu.addSeparator()
 
         self.helpMenu = QtWidgets.QMenu("Help", self)
-        self.helpMenu.addAction(self.aboutAct)
+        self.helpMenu.addAction(about_act)
 
         self.menuBar().setNativeMenuBar(False)
         self.menuBar().addMenu(self.fileMenu)
