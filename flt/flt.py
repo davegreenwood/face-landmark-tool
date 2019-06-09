@@ -242,7 +242,7 @@ class LabelerScene(QtWidgets.QGraphicsScene):
     def __init__(self, parent):
         super(LabelerScene, self).__init__(parent)
         self.image = QtWidgets.QGraphicsPixmapItem()
-        self.image_fname = "None"
+        self.image_fname = "no_image"
         self.model = Model(scene=self)
         self.addItem(self.image)
         self.setSceneRect(QtCore.QRectF(0, 0, WIDTH, HEIGHT))
@@ -250,7 +250,9 @@ class LabelerScene(QtWidgets.QGraphicsScene):
     def print_pos(self):
         """Print the image file name and (x, y) positions of the markers."""
         self.model.get_positions()
-        print(self.image_fname, ":", self.model.positions)
+        pos = ", ".join(
+            [f"[{x:0.2f}, {y:0.2f}]" for x, y in self.model.positions])
+        print(f'"{self.image_fname:}" : [{pos}]')
 
     def set_image(self, fname):
         """Set the image in the scene from a filename."""
