@@ -72,7 +72,7 @@ class Marker(QtWidgets.QGraphicsPathItem):
     def itemChange(self, change, value):
         if (change == QtWidgets.QGraphicsItem.ItemPositionChange and
                 self.isEnabled()):
-            self.m_group_item.movePoint(self.m_index, value)
+            self.m_group_item.move_point(self.m_index, value)
         return super(Marker, self).itemChange(change, value)
 
     def shape(self):
@@ -106,7 +106,7 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
         painter_path.addPolygon(QtGui.QPolygonF(self.m_points))
         self.setPath(painter_path)
 
-    def addPoint(self, p):
+    def add_point(self, p):
         self.m_points.append(p)
         self.set_path()
         item = Marker(self, len(self.m_points) - 1)
@@ -122,9 +122,9 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
 
     def add_points(self, pts):
         for x, y in pts:
-            self.addPoint(QtCore.QPointF(x, y))
+            self.add_point(QtCore.QPointF(x, y))
 
-    def movePoint(self, index, pos):
+    def move_point(self, index, pos):
         if 0 <= index < len(self.m_points):
             self.m_points[index] = self.mapFromScene(pos)
             self.set_path()
