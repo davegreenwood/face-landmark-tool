@@ -496,9 +496,10 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
 
     def save_mdl(self):
         """Save a model using the file dialogue."""
-        default_name = os.path.join(QtCore.QDir.currentPath(), "model.json")
+        img = self.scene.image_fname.split(".")[0]
+        default_name = os.path.join(QtCore.QDir.currentPath(), f"{img}.json")
         fname, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Save Model File", default_name, "JSON file (*.json)")
+            self, "Save Model File", default_name)
         if not fname:
             return
         model_out = self.scene.model.to_dict()
