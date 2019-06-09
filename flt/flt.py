@@ -52,7 +52,7 @@ class Marker(QtWidgets.QGraphicsPathItem):
         self.m_index = index
         self.setPath(Marker.cross)
         self.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
-        self.setPen(self.default_pen)
+        self.setPen(self.default_pen())
 
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable, True)
@@ -60,6 +60,10 @@ class Marker(QtWidgets.QGraphicsPathItem):
         self.setAcceptHoverEvents(True)
         self.setZValue(20)
         self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
+    def default_pen(self):
+        """return yellow pen for first Marker, else green. """
+        return Pen.yel_pen if self.m_index == 0 else Pen.grn_pen
 
     def hoverEnterEvent(self, event):
         """Override super."""
