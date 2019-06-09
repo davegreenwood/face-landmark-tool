@@ -334,11 +334,39 @@ class LabelerView(QtWidgets.QGraphicsView):
         QtWidgets.QShortcut(QtGui.QKeySequence("Alt+-"),
                             self, activated=self.scale_down)
 
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+1"),
+                            self, activated=self.line_s)
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+2"),
+                            self, activated=self.line_m)
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+3"),
+                            self, activated=self.line_l)
 
     def update(self):
         """update the view"""
         self.scene().update()
         super(LabelerView, self).update()
+
+    @QtCore.pyqtSlot()
+    def line_s(self):
+        """Line width 0.5 """
+        line_width = 0.5
+        Pen.set_line(line_width)
+        self.update()
+
+    @QtCore.pyqtSlot()
+    def line_m(self):
+        """Line width 1.0 """
+        line_width = 1.0
+        Pen.set_line(line_width)
+        self.update()
+
+    @QtCore.pyqtSlot()
+    def line_l(self):
+        """Line width 2.0 """
+        line_width = 2.0
+        Pen.set_line(line_width)
+        self.update()
+
     @QtCore.pyqtSlot()
     def scale_up(self):
         """Zoom in."""
