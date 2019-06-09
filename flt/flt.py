@@ -54,33 +54,33 @@ class Marker(QtWidgets.QGraphicsPathItem):
         self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
     def hoverEnterEvent(self, event):
-        """Overide super."""
+        """Override super."""
         self.setPath(Marker.square)
         self.setPen(self.red_pen)
         self.setBrush(QtGui.QColor(255, 0, 0, 32))
         super(Marker, self).hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
-        """Overide super."""
+        """Override super."""
         self.setPath(Marker.cross)
         self.setPen(self.default_pen)
         self.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
         super(Marker, self).hoverLeaveEvent(event)
 
     def mouseReleaseEvent(self, event):
-        """Overide super."""
+        """Override super."""
         self.setSelected(False)
         super(Marker, self).mouseReleaseEvent(event)
 
     def itemChange(self, change, value):
-        """Overide super."""
+        """Override super."""
         if (change == QtWidgets.QGraphicsItem.ItemPositionChange and
                 self.isEnabled()):
             self.m_group_item.move_point(self.m_index, value)
         return super(Marker, self).itemChange(change, value)
 
     def shape(self):
-        """Overide super."""
+        """Override super."""
         qp = QtGui.QPainterPathStroker()
         qp.setWidth(MARGIN)
         qp.setCapStyle(QtCore.Qt.SquareCap)
@@ -148,7 +148,7 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
             item.setEnabled(True)
 
     def shape(self):
-        """Overide super."""
+        """Override super."""
         qp = QtGui.QPainterPathStroker()
         qp.setWidth(MARGIN)
         qp.setCapStyle(QtCore.Qt.SquareCap)
@@ -156,19 +156,19 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
         return shape
 
     def itemChange(self, change, value):
-        """Overide super."""
+        """Override super."""
         if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
             for i, point in enumerate(self.m_points):
                 self.move_item(i, self.mapToScene(point))
         return super(LineGroup, self).itemChange(change, value)
 
     def hoverEnterEvent(self, event):
-        """Overide super."""
+        """Override super."""
         self.setPen(self.red_pen)
         super(LineGroup, self).hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
-        """Overide super."""
+        """Override super."""
         self.setPen(self.grn_pen)
         super(LineGroup, self).hoverLeaveEvent(event)
 
@@ -289,22 +289,27 @@ class LabelerView(QtWidgets.QGraphicsView):
 
     @QtCore.pyqtSlot()
     def zoomIn(self):
+        """Zoom in."""
         self.zoom(LabelerView.factor)
 
     @QtCore.pyqtSlot()
     def zoomOut(self):
+        """Zoom out."""
         self.zoom(1. / LabelerView.factor)
 
     def zoom(self, factor):
+        """Zoom by factor."""
         self.scale(factor, factor)
         if self.scene() is not None:
             self.centerOn(self.scene().image)
 
     def fitInView(self, *args):
+        """Fit to 100 %"""
         self.resetTransform()
         self.scale(1.0, 1.0)
 
     def wheelEvent(self, event):
+        """scroll to zoom"""
         if event.angleDelta().y() > 0:
             self.zoomIn()
         else:
