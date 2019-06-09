@@ -54,28 +54,33 @@ class Marker(QtWidgets.QGraphicsPathItem):
         self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
     def hoverEnterEvent(self, event):
+        """Overide super."""
         self.setPath(Marker.square)
         self.setPen(self.red_pen)
         self.setBrush(QtGui.QColor(255, 0, 0, 32))
         super(Marker, self).hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
+        """Overide super."""
         self.setPath(Marker.cross)
         self.setPen(self.default_pen)
         self.setBrush(QtGui.QBrush(QtCore.Qt.NoBrush))
         super(Marker, self).hoverLeaveEvent(event)
 
     def mouseReleaseEvent(self, event):
+        """Overide super."""
         self.setSelected(False)
         super(Marker, self).mouseReleaseEvent(event)
 
     def itemChange(self, change, value):
+        """Overide super."""
         if (change == QtWidgets.QGraphicsItem.ItemPositionChange and
                 self.isEnabled()):
             self.m_group_item.move_point(self.m_index, value)
         return super(Marker, self).itemChange(change, value)
 
     def shape(self):
+        """Overide super."""
         qp = QtGui.QPainterPathStroker()
         qp.setWidth(MARGIN)
         qp.setCapStyle(QtCore.Qt.SquareCap)
@@ -84,7 +89,7 @@ class Marker(QtWidgets.QGraphicsPathItem):
 
 
 class LineGroup(QtWidgets.QGraphicsPathItem):
-
+    """This class groups the points to semantic regions, eg: right eye... """
     red_pen = QtGui.QPen(QtGui.QColor("red"), 0.5)
     grn_pen = QtGui.QPen(QtGui.QColor("green"), 0.5)
 
@@ -102,11 +107,13 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
         self.m_items = []
 
     def set_path(self):
+        """Set the painter path from the stored points."""
         painter_path = QtGui.QPainterPath()
         painter_path.addPolygon(QtGui.QPolygonF(self.m_points))
         self.setPath(painter_path)
 
     def add_point(self, p):
+        """Add a single point. """
         self.m_points.append(p)
         self.set_path()
         item = Marker(self, len(self.m_points) - 1)
@@ -115,21 +122,25 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
         item.setPos(p)
 
     def delete_markers(self):
+        """Fully delete the group markers."""
         while self.m_items:
             item = self.m_items.pop(0)
             self.scene().removeItem(item)
             del item
 
     def add_points(self, pts):
+        """Add points from a list of (x, y) tuples."""
         for x, y in pts:
             self.add_point(QtCore.QPointF(x, y))
 
     def move_point(self, index, pos):
+        """Move a point and update the painter path."""
         if 0 <= index < len(self.m_points):
             self.m_points[index] = self.mapFromScene(pos)
             self.set_path()
 
     def move_item(self, index, pos):
+        """Move the marker item """
         if 0 <= index < len(self.m_items):
             item = self.m_items[index]
             item.setEnabled(False)
@@ -137,6 +148,7 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
             item.setEnabled(True)
 
     def shape(self):
+        """Overide super."""
         qp = QtGui.QPainterPathStroker()
         qp.setWidth(MARGIN)
         qp.setCapStyle(QtCore.Qt.SquareCap)
@@ -144,16 +156,19 @@ class LineGroup(QtWidgets.QGraphicsPathItem):
         return shape
 
     def itemChange(self, change, value):
+        """Overide super."""
         if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
             for i, point in enumerate(self.m_points):
                 self.move_item(i, self.mapToScene(point))
         return super(LineGroup, self).itemChange(change, value)
 
     def hoverEnterEvent(self, event):
+        """Overide super."""
         self.setPen(self.red_pen)
         super(LineGroup, self).hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
+        """Overide super."""
         self.setPen(self.grn_pen)
         super(LineGroup, self).hoverLeaveEvent(event)
 
@@ -168,6 +183,7 @@ class Model(object):
         self.load_model()
 
     def load_model(self, model_dict=model):
+        """Load a model from a dictionary."""
         self.delete_model()
         self.index = model_dict["index"]
         self.positions = model_dict["pos"]
@@ -176,6 +192,7 @@ class Model(object):
             self.add_group([self.positions[i] for i in self.index[key]], key)
 
     def delete_model(self):
+        """Fully delete a model."""
         while self.groups:
             group = self.groups.pop(0)
             group.delete_markers()
@@ -183,14 +200,17 @@ class Model(object):
             del group
 
     def select_model(self):
+        """Select all the groups in the model."""
         for group in self.groups:
             group.setSelected(True)
 
     def deselect_model(self):
+        """Deselect all the groups in the model."""
         for group in self.groups:
             group.setSelected(False)
 
     def add_group(self, pts, label=None):
+        """Add a new group to the model."""
         group = LineGroup()
         if label:
             group.setToolTip(label)
@@ -200,12 +220,14 @@ class Model(object):
         return group
 
     def get_positions(self):
+        """Get the positions of all the markers in all the groups."""
         self.positions = []
         for group in self.groups:
             for item in group.m_items:
                 self.positions.append([item.pos().x(), item.pos().y()])
 
     def to_dict(self):
+        """Return a dictionary of the model."""
         self.get_positions()
         return dict(index=self.index, keys=self.keys, pos=self.positions)
 
@@ -226,10 +248,12 @@ class LabelerScene(QtWidgets.QGraphicsScene):
         self.setSceneRect(QtCore.QRectF(0, 0, WIDTH, HEIGHT))
 
     def print_pos(self):
+        """Print the image file name and (x, y) positions of the markers."""
         self.model.get_positions()
         print(self.image_fname, ":", self.model.positions)
 
     def set_image(self, fname):
+        """Set the image in the scene from a filename."""
         self.image.setPixmap(QtGui.QPixmap(fname))
         self.setSceneRect(self.image.boundingRect())
         _, self.image_fname = os.path.split(fname)
@@ -241,6 +265,7 @@ class LabelerScene(QtWidgets.QGraphicsScene):
 
 
 class LabelerView(QtWidgets.QGraphicsView):
+    """The view on the model. """
     factor = 1.25
 
     def __init__(self, parent=None):
@@ -307,10 +332,12 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
         self.show()
 
     def about(self):
+        """Show help. """
         msg = """Face Label Tool Help:"""
         QtWidgets.QMessageBox.about(self, "About Face Label Tool", msg)
 
     def createMenus(self):
+        """Build the menus."""
         self.openAct = QtWidgets.QAction(
             "Open Image...", self, shortcut="Ctrl+O", triggered=self.open_img)
         self.modelAct = QtWidgets.QAction(
@@ -360,6 +387,7 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
         self.menuBar().addMenu(self.helpMenu)
 
     def open_mdl(self):
+        """Open a model using the file dialogue."""
         fname, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, "Open Model File", QtCore.QDir.currentPath())
         if not fname:
@@ -368,6 +396,7 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
         self.scene.model.load_model(model)
 
     def save_mdl(self):
+        """Save a model using the file dialogue."""
         default_name = os.path.join(QtCore.QDir.currentPath(), "model.json")
         fname, _ = QtWidgets.QFileDialog.getSaveFileName(
             self, "Save Model File", default_name, "JSON file (*.json)")
@@ -377,6 +406,7 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
         write_json(model, fname)
 
     def open_img(self):
+        """Open an image using the file dialogue."""
         fname, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, "Open Image", QtCore.QDir.currentPath())
         if not fname:
@@ -390,6 +420,7 @@ class ImageLabelerWindow(QtWidgets.QMainWindow):
 
 
 def main():
+    """Run the application."""
     app = QtWidgets.QApplication(["Face Label Tool"] + sys.argv[1:])
     path = resource_filename(__name__, "data/icon.png")
     app.setWindowIcon(QtGui.QIcon(path))
