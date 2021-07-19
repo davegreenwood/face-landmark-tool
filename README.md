@@ -1,5 +1,7 @@
 # Face Landmark Tool
 
+![](demo.gif)
+
 A simple application for labelling facial landmarks. Although this may grow, the
 key features are:
 
